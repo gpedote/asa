@@ -1,0 +1,3 @@
+[submodule "leitor"]
+	path = leitor
+	url = git@github.com:gpedote/leitor-particoes.git
