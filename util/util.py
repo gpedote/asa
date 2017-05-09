@@ -46,8 +46,12 @@ def calcular_ari(p1, p2):
 
 def simetrizar_matriz(m):
     '''
-    Copia a metade superior da matriz para a metade inferior
+    Copia o triângulo superior da matriz para o triângulo inferior
+
+    src: https://stackoverflow.com/questions/17527693/
 
     :param m: Matriz a ser simetrizada
     '''
-    return m + m.T - np.diag(m.diagonal())
+    inds = np.triu_indices_from(m, k=1) #k=1 é para ignorar a diagonal
+    m[(inds[1], inds[0])] = m[inds]
+    return m
