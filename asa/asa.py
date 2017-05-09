@@ -4,7 +4,7 @@
 import numpy as np
 import pandas as pd
 
-from context import calcular_matriz_cr, calcular_ari, is_close
+from context import calcular_matriz_cr, calcular_ari
 
 class ASA(object):
 
@@ -58,7 +58,7 @@ class ASA(object):
             particoes_a_serem_removidas = []
             for i in parts_evidentes.index.tolist():
                 for j in matriz_cr.index.tolist():
-                    if (matriz_cr_original[i][j] >= limite_cr):
+                    if (self.__eh_maior_ou_igual_float(matriz_cr_original[i][j], limite_cr)):
                         particoes_a_serem_removidas.append(j)
 
             # Remove duplicações
@@ -83,7 +83,8 @@ class ASA(object):
                 # Excluí partições onde CR(part_com_maior_cr_medio, J) maiores que limite_cr
                 particoes_a_serem_removidas = []
                 for j in matriz_cr.index.tolist():
-                    if (matriz_cr_original[part_com_maior_cr_medio][j] >= limite_cr):
+                    if (self.__eh_maior_ou_igual_float(
+                            matriz_cr_original[part_com_maior_cr_medio][j], limite_cr)):
                         particoes_a_serem_removidas.append(j)
 
                 # Remove duplicações
@@ -105,8 +106,8 @@ class ASA(object):
             dados_processamento = dados_processamento.append(pd.DataFrame([[
                     limite_cr, len(matriz_cr_atual),razao, razao_anterior, razao_anterior - razao
                     ]], columns=colunas_processamento))
-            if (razao_anterior - razao > self.LIMIAR_RAZAO_ASA
-                    and limite_cr >= self.LIMIAR_FINAL_ASA):
+            if (self.__verificar_se_ultrapassou_o_limiar_razao(razao, razao_anterior)
+                    and self.__eh_maior_ou_igual_float(limite_cr, self.LIMIAR_FINAL_ASA)):
                 # Atualiza limite_cr, pois caso contrário, não ficaria claro se o limite_cr_anterior
                 # ou o limite_cr é o limite pelo qual as partições da solução foram escolhidas
                 limite_cr_anterior = limite_cr
@@ -120,12 +121,19 @@ class ASA(object):
         return self.__obter_resultado_final(parts_evidentes, limite_cr, matriz_cr_anterior,
                 matriz_cr_atual)
 
+    def __eh_maior_ou_igual_float(self, a, b):
+        return a > b or np.isclose(a, b)
+
+    def __verificar_se_ultrapassou_o_limiar_razao(self, razao, razao_anterior):
+        return (razao_anterior - razao > self.LIMIAR_RAZAO_ASA
+                and not np.isclose(razao_anterior - razao, self.LIMIAR_RAZAO_ASA))
+
     def __obter_resultado_final(self, parts_evidentes, limite_cr, matriz_cr_anterior,
             matriz_cr_atual):
         solucao_final = parts_evidentes.index.tolist()
 
         # Solução final, passo 8 do artigo
-        if (limite_cr > 0.1):
+        if (limite_cr > 0.1 and not np.isclose(limite_cr, 0.1)):
             solucao_final.extend(matriz_cr_anterior.index.tolist())
         else:
             solucao_final.extend(matriz_cr_atual.index.tolist())
@@ -153,7 +161,7 @@ class ASA(object):
 
         for i, crs in matriz_cr.iterrows():
             if i not in parts_duplicadas:
-                parts_identicas = np.argwhere(is_close(crs, 1))
+                parts_identicas = np.argwhere(np.isclose(crs, 1))
                 if (len(parts_identicas) >= max_parts_identicas):
                     parts_evidentes.loc[i] = self.particoes.loc[i]
 

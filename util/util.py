@@ -9,9 +9,6 @@ from sklearn.metrics.cluster import adjusted_rand_score
 import numpy as np
 import pandas as pd
 
-def is_close(a, b, rtol=1e-09, atol=1e-08):
-    return np.abs(a-b) <= (atol + rtol * np.abs(b))
-
 def obter_numeros_particoes(particoes, nomes_particoes):
     numeros_particoes = []
     for i, particao_i in particoes.iterrows():
