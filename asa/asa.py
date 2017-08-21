@@ -118,25 +118,18 @@ class ASA(object):
         if (self.exibir_dados_processamento):
             print dados_processamento
 
-        return self.__obter_resultado_final(parts_evidentes, limite_cr, matriz_cr_anterior,
-                matriz_cr_atual)
+        return self.__obter_resultado_final(parts_evidentes, limite_cr, matriz_cr_anterior)
 
     def __eh_maior_ou_igual_float(self, a, b):
         return a > b or np.isclose(a, b)
 
     def __verificar_se_ultrapassou_o_limiar_razao(self, razao, razao_anterior):
-        return (razao_anterior - razao > self.LIMIAR_RAZAO_ASA
-                and not np.isclose(razao_anterior - razao, self.LIMIAR_RAZAO_ASA))
+        return (razao_anterior - razao > self.LIMIAR_RAZAO_ASA)
 
-    def __obter_resultado_final(self, parts_evidentes, limite_cr, matriz_cr_anterior,
-            matriz_cr_atual):
-        solucao_final = parts_evidentes.index.tolist()
-
+    def __obter_resultado_final(self, parts_evidentes, limite_cr, matriz_cr_anterior):
         # Solução final, passo 8 do artigo
-        if (limite_cr > 0.1 and not np.isclose(limite_cr, 0.1)):
-            solucao_final.extend(matriz_cr_anterior.index.tolist())
-        else:
-            solucao_final.extend(matriz_cr_atual.index.tolist())
+        solucao_final = parts_evidentes.index.tolist()
+        solucao_final.extend(matriz_cr_anterior.index.tolist())
 
         return solucao_final
 

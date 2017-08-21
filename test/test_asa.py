@@ -40,17 +40,10 @@ class TestASA(unittest.TestCase):
     def setUp(self):
         leitor = Leitor()
         caminho = os.path.join(os.path.dirname(__file__), "resources", "iris-particoes",
-                "iris-algPartitions-E")
+                "iris-particoes")
         self.particoes = leitor.ler_particoes(caminho)
         self.asa = ASA(self.particoes)
         self.matriz_cr = calcular_matriz_cr(self.particoes, calcular_ari)
-
-    def tearDown(self):
-        pass
-
-    def test_calcular_matriz_cr_deve_retornar_data_frame_do_pandas(self):
-        self.assertIsInstance(self.matriz_cr, pd.DataFrame, "A matriz deve ser um Dataframe")
-        self.assertEqual(self.matriz_cr.shape, (37, 37), "A matriz deve ser NxN")
 
     def test_verifica_corretude_com_zero_particoes_iguais(self):
         self.__verificar_se_resultado_esta_correto(self.asa.asa(0),
@@ -81,6 +74,21 @@ class TestASA(unittest.TestCase):
                 valores.append(self.matriz_cr.loc[e][j])
             self.assertTrue(1 in valores, "Deve haver pelo menos uma partição"
                     + "igual incluída no resultado atual que seja identica ao resultado anterior")
+
+class TestParticoesDuplicadas(unittest.TestCase):
+
+    def setUp(self):
+        leitor = Leitor()
+        caminho = os.path.join(os.path.dirname(__file__), "resources", "outras-particoes",
+                "duplicadas")
+        self.particoes = leitor.ler_particoes(caminho)
+        self.asa = ASA(self.particoes)
+
+    def test_garante_que_esta_removendo_as_duplicadas(self):
+        self.assertEqual(len(self.asa.asa(2)), 1, "Deve remover as duplicadas")
+
+    def test_garante_que_esta_removendo_as_triplicadas(self):
+        self.assertEqual(len(self.asa.asa(3)), 1, "Deve remover as triplicadas")
 
 if __name__ == "__main__":
     # import sys;sys.argv = [""]
