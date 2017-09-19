@@ -22,6 +22,7 @@ class ASA(object):
         matriz_cr_original = matriz_cr.copy()
         (parts_evidentes, parts_duplicadas) = self.__obter_particoes_evidentes_e_duplicadas(
                 matriz_cr, max_parts_identicas)
+        parts_duplicadas.extend(parts_evidentes.index.tolist())
         matriz_cr = self.__obter_matriz_cr_sem_particoes_duplicadas(matriz_cr, parts_duplicadas)
 
         # Calcula CR médio das partições restantes
@@ -150,17 +151,15 @@ class ASA(object):
         para ser considerada uma partição evidente
         '''
         parts_evidentes = pd.DataFrame([], columns=self.particoes.columns)
-        parts_duplicadas = np.array([], dtype=np.int)
+        parts_duplicadas = []
 
         for i, crs in matriz_cr.iterrows():
             if i not in parts_duplicadas:
-                parts_identicas = np.argwhere(np.isclose(crs, 1))
+                parts_identicas = np.flatnonzero(np.isclose(crs, 1)).tolist()
+                parts_identicas.remove(i)
+
                 if (len(parts_identicas) >= max_parts_identicas):
                     parts_evidentes.loc[i] = self.particoes.loc[i]
-
-                    tmp = parts_identicas.tolist()
-                    tmp.remove(i)
-
-                    parts_duplicadas = np.append(parts_duplicadas, tmp)
+                    parts_duplicadas.extend(parts_identicas)
 
         return (parts_evidentes, parts_duplicadas)
